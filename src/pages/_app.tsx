@@ -1,5 +1,5 @@
 import { type AppType } from "next/app";
-
+import 'material-icons/iconfont/material-icons.css';
 import { api } from "~/utils/api";
 
 import { ClerkProvider, SignInButton, SignOutButton, useUser } from "@clerk/nextjs";
@@ -11,7 +11,7 @@ const Footer = () => {
     return (
         <footer className="flex flex-row bg-slate-800 justify-center align-center w-full basis-6 items-stretch text-white font-mono">
             <p>Made with&nbsp;</p>
-            <p className="material-icons-outlined">favorite_border</p>
+            <p className="material-icons-outlined">favorite</p>
             <p>&nbsp;by Shreyaschavan228a&nbsp;</p>
             <Link href="https://github.com/Shreyaschavan228a" className="text-white my-auto">
                 <svg stroke="currentColor" fill="currentColor" strokeWidth="0" height="1em" width="1em" viewBox="0 0 496 512">
