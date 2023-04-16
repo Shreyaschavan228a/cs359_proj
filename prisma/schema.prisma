@@ -44,6 +44,7 @@ model User {
     username String?
     recv     Message[] @relation("recv")
     sent     Message[] @relation("sent")
+    chats    Chat[]
 
     @@index([id])
 }
@@ -63,4 +64,10 @@ model Message {
 
     @@index([senderId])
     @@index([recieverId])
+}
+
+model Chat {
+    id    Int    @id @default(autoincrement())
+    name  String @default("")
+    users User[]
 }
