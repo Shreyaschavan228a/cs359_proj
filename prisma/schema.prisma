@@ -40,11 +40,12 @@ datasource db {
 //     users User[]
 // }
 model User {
-    id       String    @id @unique @default("admin")
-    username String?
-    recv     Message[] @relation("recv")
-    sent     Message[] @relation("sent")
-    chats    Chat[]
+    id           String    @id @unique @default("admin")
+    username     String?
+    profileImage String    @default("")
+    recv         Message[] @relation("recv")
+    sent         Message[] @relation("sent")
+    chats        Chat[]
 
     @@index([id])
 }
