@@ -59,13 +59,13 @@ model Message {
     sender   User   @relation(name: "sent", references: [id], fields: [senderId])
     senderId String
 
-    receiver   User   @relation(name: "recv", references: [id], fields: [recieverId])
-    recieverId String
+    receiver   User   @relation(name: "recv", references: [id], fields: [receiverId])
+    receiverId String
 
     createdAt DateTime @default(now())
 
     @@index([senderId])
-    @@index([recieverId])
+    @@index([receiverId])
 }
 
 model Chat {
