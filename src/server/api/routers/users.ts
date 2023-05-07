@@ -2,12 +2,37 @@ import { z } from "zod";
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 
-import type { User } from "@prisma/client";
+import { User, Chat } from "@prisma/client";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
 
 export const userRouter = createTRPCRouter({
   getUsers: publicProcedure.query(({ ctx }) => {
     return ctx.prisma.user.findMany();
   }),
+  // createUserIfNotExist will create a new user if the user doesnt already exist in the db
+  createUserIfNotExist: publicProcedure
+    .input(z.object({ userId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const { userId } = input;
+      const user = await ctx.prisma.user.findUnique({
+        where: {
+          id: userId,
+        },
+      });
+
+      if (!user) {
+        await ctx.prisma.user.create({
+          data: {
+            id: userId,
+            username: "",
+            profileImage: "",
+          },
+        });
+      }
+      return 1;
+    }),
+  // get unique user can be used to get current user's data as well as create a
+  // new user if it doesn't already exist
   getUniqueUser: publicProcedure
     .input(z.object({ userId: z.string() }))
     .query(async ({ ctx, input }) => {
@@ -24,14 +49,38 @@ export const userRouter = createTRPCRouter({
           data: {
             id: userId,
             username: "",
+            profileImage: "",
           },
         });
         user = {
           id: userId,
           username: "",
+          profileImage: "",
         };
       }
-
       return user;
+    }),
+  getUserChats: publicProcedure
+    .input(z.object({ userId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const { userId } = input;
+
+      const chats = await ctx.prisma.chat.findMany({
+        where: {
+          OR: [{ user_one_id: userId }, { user_two_id: userId }],
+        },
+      });
+      const dummyChat = [
+        {
+          id: -1,
+          name: "not_found",
+          user_one_id: userId,
+          user_two_id: userId,
+        },
+      ] as Chat[];
+      if (!chats) {
+        return dummyChat;
+      }
+      return chats;
     }),
 });

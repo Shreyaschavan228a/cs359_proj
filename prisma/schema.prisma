@@ -45,7 +45,8 @@ model User {
     profileImage String    @default("")
     recv         Message[] @relation("recv")
     sent         Message[] @relation("sent")
-    chats        Chat[]
+    chat_started Chat[]    @relation("chat_started")
+    chat_joined  Chat[]    @relation("chat_joined")
 
     @@index([id])
 }
@@ -68,7 +69,15 @@ model Message {
 }
 
 model Chat {
-    id    Int    @id @default(autoincrement())
-    name  String @default("")
-    users User[]
+    id   Int    @id @default(autoincrement())
+    name String @default("")
+
+    user_one    User   @relation(name: "chat_started", references: [id], fields: [user_one_id])
+    user_one_id String
+
+    user_two    User   @relation(name: "chat_joined", references: [id], fields: [user_two_id])
+    user_two_id String
+
+    @@index([user_one_id])
+    @@index([user_two_id])
 }
