@@ -1,13 +1,59 @@
 import { SignInButton, SignOutButton, useUser } from "@clerk/nextjs";
+import { User } from "@clerk/nextjs/dist/api";
 import { type NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { useEffect } from "react";
+import ChatView from "~/components/ChatView";
 import { api } from "~/utils/api";
+
+
+const Page = () => {
+    const router = useRouter();
+    const id = router.asPath.slice(1);
+    const { user, isSignedIn, isLoaded } = useUser();
+
+    const checkValidUser = () => {
+        if (!isSignedIn || id !== user.id) {
+            router.push("../").finally(() => {
+                console.log("User not logged in");
+            });
+        }
+    }
+    useEffect(() => {
+        checkValidUser();
+    }, [isLoaded, isSignedIn]);
+
+    // this will never load unless the user directly navigates to this specific url without signing in
+    if (!user) return <div>Something went wrong</div>
+
+
+    return (
+        <div className="w-full flex flex-row h-full">
+            {isSignedIn &&
+                <>
+                    <div className="chats grow "><ChatView userId={user.id} /></div>
+                    <div className="message-window grow-[2.5] bg-gradient-to-b from-[#2e026d] to-[#15162c] h-full">messages</div>
+                </>
+            }
+            {
+                !isSignedIn && <div>Something went wrong</div>
+            }
+        </div>
+    )
+}
+
 
 const Home: NextPage = () => {
     const { user, isSignedIn, isLoaded } = useUser();
     const router = useRouter();
+
+
+
+    if (isSignedIn && user) {
+        api.users.createUserIfNotExist.useQuery({ userId: user.id });
+    }
 
     return (
         <>
@@ -18,12 +64,7 @@ const Home: NextPage = () => {
             </Head>
             <main className="h-full flex flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c] text-white overflow-y-scroll">
                 {isSignedIn && user &&
-                    <div>
-                        <p>Succeccfully logged in!</p>
-                        <Link href={`./${user.id}`}>
-                            <h1 className="underline">Continue to Application</h1>
-                        </Link>
-                    </div>
+                    <Page />
                 }
                 {
                     !isSignedIn &&
@@ -33,5 +74,7 @@ const Home: NextPage = () => {
         </>
     );
 };
+
+
 
 export default Home;
