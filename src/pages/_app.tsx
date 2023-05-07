@@ -26,7 +26,7 @@ const Footer = () => {
 const Header = () => {
     const { isSignedIn } = useUser();
     return (
-        <footer className="flex flex-row bg-slate-800 justify-between align-center w-full basis-6 items-stretch text-white font-mono h-10 p-2">
+        <footer className="flex flex-row bg-slate-800 justify-between align-center w-full basis-6 items-stretch text-white font-mono h-10 p-2 border-b-2 border-black">
             <h1>Chat App</h1>
             <div>
                 {isSignedIn && <SignOutButton />}
