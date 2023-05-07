@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { api } from "~/utils/api";
 import type { User } from "@prisma/client";
 import Link from "next/link";
-import { ToastContainer, toast } from 'react-toastify';
 
 const UpdatePage = () => {
     const { user, isSignedIn, isLoaded } = useUser();
