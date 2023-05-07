@@ -10,7 +10,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   } = JSON.parse(req.body as string) as {
     userId: string;
     username: string;
-    profileUrl: string;
+    profileUrl: string | undefined;
   };
   console.log(userId, username, profileImage);
   try {
