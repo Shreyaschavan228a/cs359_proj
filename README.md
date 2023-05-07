@@ -15,3 +15,8 @@ Usage:
 2. Make .env file in project root and populate it with correct keys from .env.example
 3. run ```npm install && npm run dev```
 
+---
+Icons from [FreePik - FlatIcon](https://www.flaticon.com/free-icons/)
+
+
+
