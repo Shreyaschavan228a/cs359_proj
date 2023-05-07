@@ -4,16 +4,17 @@ import { type NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import ChatView from "~/components/ChatView";
+import MessageView from "~/components/MessageView";
 import { api } from "~/utils/api";
 
 
-const Page = () => {
+const MainContainer = () => {
     const router = useRouter();
     const id = router.asPath.slice(1);
     const { user, isSignedIn, isLoaded } = useUser();
-
+    const [currentChat, setChat] = useState("");
     const checkValidUser = () => {
         if (!isSignedIn || id !== user.id) {
             router.push("../").finally(() => {
@@ -33,8 +34,15 @@ const Page = () => {
         <div className="w-full flex flex-row h-full">
             {isSignedIn &&
                 <>
-                    <div className="chats grow "><ChatView userId={user.id} /></div>
-                    <div className="message-window grow-[2.5] bg-gradient-to-b from-[#2e026d] to-[#15162c] h-full">messages</div>
+                    <div className="chats grow "><ChatView userId={user.id} setChat={setChat} /></div>
+                    <div className="message-window grow-[2.5] bg-gradient-to-b from-[#2e026d] to-[#15162c] h-full">
+                        {
+                            currentChat === "" && <div>Select chat or start new</div>
+                        }
+                        {
+                            currentChat !== "" && <MessageView otherUserId={currentChat} />
+                        }
+                    </div>
                 </>
             }
             {
@@ -64,7 +72,7 @@ const Home: NextPage = () => {
             </Head>
             <main className="h-full flex flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c] text-white overflow-y-scroll">
                 {isSignedIn && user &&
-                    <Page />
+                    <MainContainer />
                 }
                 {
                     !isSignedIn &&

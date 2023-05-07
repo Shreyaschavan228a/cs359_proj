@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { SetStateAction, useEffect } from "react";
 import type { User } from "@prisma/client";
 import { api } from "~/utils/api";
 import Image from "next/image";
@@ -19,7 +19,7 @@ const ChatItem = (props: { name: string, userId: string }) => {
                         <Image src={user.profileImage === "" ? placholderImage : user.profileImage} alt="profile-image" width="40" height="40" />
                     </div>
                     <div className="flex flex-col">
-                        <p className="text-2xl">{user.id}</p>
+                        <p className="text-2xl">{user.username}</p>
                         <p className="text-slate-300">{props.name}</p>
                     </div>
                 </div>
@@ -29,9 +29,9 @@ const ChatItem = (props: { name: string, userId: string }) => {
     )
 }
 
-const ChatView = (props: { userId: string }) => {
-    const { userId } = props;
-    const { data: userGroups, isLoading } = api.users.getUserChats.useQuery({ userId })
+const ChatView = (props: { userId: string, setChat: React.Dispatch<SetStateAction<string>> }) => {
+    const { userId, setChat } = props;
+    const { data: userChats, isLoading } = api.users.getUserChats.useQuery({ userId })
 
 
     return (
@@ -47,7 +47,7 @@ const ChatView = (props: { userId: string }) => {
                     </div>
                     <div className="bg-gradient-to-r from-slate-800 to-slate-900 grow">
                         {
-                            userGroups?.map((e, i) => {
+                            userChats?.map((e, i) => {
                                 let other_user_id: string;
                                 if (e.user_one_id == userId) {
                                     other_user_id = e.user_two_id;
@@ -55,7 +55,11 @@ const ChatView = (props: { userId: string }) => {
                                 else {
                                     other_user_id = e.user_one_id;
                                 }
-                                return <ChatItem name={e.name ?? "Unknown chat"} userId={other_user_id} key={i} />
+                                return (
+                                    <div key={i} onClick={() => setChat(other_user_id)}>
+                                        <ChatItem name={e.name !== "" ? e.name : "Unknown chat"} userId={other_user_id} />
+                                    </div>
+                                )
                             })
                         }
                     </div>
