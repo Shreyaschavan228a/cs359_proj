@@ -54,7 +54,7 @@ const UpdatePage = () => {
     }
 
     return (
-        <div>
+        <div className="h-full w-full">
             {
                 isSignedIn && isLoaded &&
                 <div className="flex flex-col justify-center items-center p-2 py-4 h-2/4 gap-8">
@@ -82,9 +82,9 @@ const UpdatePage = () => {
             }
             {
                 (!isSignedIn || !isLoaded) &&
-                <div>
+                <div className="h-full w-full flex flex-col items-center justify-center text-3xl text-gray-400">
                     <p>Not Signed in</p>
-                    <Link href="..">Home</Link>
+                    <Link href=".." className="underline">Home</Link>
                 </div>
             }
         </div>
