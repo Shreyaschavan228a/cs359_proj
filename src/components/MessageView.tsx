@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { useUser } from "@clerk/nextjs";
-import { Message } from "@prisma/client";
+import type { Message } from "@prisma/client";
 import { api } from "~/utils/api";
 import sendImage from "../assets/send.png";
 import placeHolderProfileImage from "../assets/profile.png";
@@ -19,6 +19,8 @@ const MessageView = (props: { otherUserId: string }) => {
     const { user, isSignedIn } = useUser();
     const [uploadThingVisible, showUploadThing] = useState(false);
     const [fileUrl, setFileUrl] = useState("");
+    // for handling messages that were sent or received during this specific lifetime of the component
+    const [messageData, setMessageData] = useState<Message[]>([]);
     const messageRef = useRef<HTMLInputElement>(null);
     if (!isSignedIn) {
         return <div className="text-red h-full w-full">
@@ -35,15 +37,16 @@ const MessageView = (props: { otherUserId: string }) => {
     }
 
     const sendMessage = () => {
-        const message = messageRef.current!.value;
+        const content = messageRef.current!.value;
+        const message = {
+            senderId: user.id,
+            receiverId: otherUserId,
+            content,
+            file: fileUrl
+        } as Message;
         fetch("/api/sendNewMessage", {
             method: "POST",
-            body: JSON.stringify({
-                senderId: user.id,
-                receiverId: otherUserId,
-                content: message,
-                file: fileUrl
-            })
+            body: JSON.stringify(message)
         }).then((res) => res.status)
             .then((status) => {
                 if (status === 200) {
@@ -51,6 +54,7 @@ const MessageView = (props: { otherUserId: string }) => {
                 }
             }).finally(() => {
                 setFileUrl("");
+                setMessageData([...messageData, message]);
                 return;
             });
     }
@@ -159,6 +163,18 @@ const MessageView = (props: { otherUserId: string }) => {
                     <div className="grow w-full flex flex-col p-4">
                         {
                             isFetched && messages?.map((message, index) => {
+                                if (message.senderId === user.id) {
+                                    // very bad not null assertion but have to do it. no time left for proper error catching
+                                    return <UniqueMessage data={message} type={MessageType.sent} name={currentUser!.username!} key={index} />
+                                } else {
+                                    return <UniqueMessage data={message} type={MessageType.received} name={otherUser!.username!} key={index} />
+                                }
+                            })
+                        }
+                        {/* only for rendering new messages in this runtime, on next mount they will be rendered by the block above */}
+                        {/* probably have some better way of doing this */}
+                        {
+                            messageData?.map((message, index) => {
                                 if (message.senderId === user.id) {
                                     // very bad not null assertion but have to do it. no time left for proper error catching
                                     return <UniqueMessage data={message} type={MessageType.sent} name={currentUser!.username!} key={index} />
