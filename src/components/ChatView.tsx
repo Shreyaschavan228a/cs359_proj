@@ -4,7 +4,7 @@ import { api } from "~/utils/api";
 import Image from "next/image";
 import placholderImage from "../assets/profile.png";
 
-const ChatItem = (props: { name: string, userId: string }) => {
+const ChatItem = (props: { userId: string }) => {
     const { data: user, isLoading } = api.users.getUniqueUser.useQuery({ userId: props.userId });
     return (
 
@@ -14,13 +14,12 @@ const ChatItem = (props: { name: string, userId: string }) => {
             }
             {
                 user &&
-                <div className="border-b border-slate-300 flex flex-ro2 bg-gradient-to-r from-slate-800 to-slate-900 px-4 font-bold py-1 gap-2 items-center">
+                <div className="border-b border-slate-300 flex flex-ro2 bg-gradient-to-r from-slate-800 to-slate-900 px-4 font-bold py-2 gap-2 items-center">
                     <div>
                         <Image src={user.profileImage === "" ? placholderImage : user.profileImage} alt="profile-image" width="40" height="40" />
                     </div>
                     <div className="flex flex-col">
                         <p className="text-2xl">{user.username}</p>
-                        <p className="text-slate-300">{props.name}</p>
                     </div>
                 </div>
             }
@@ -57,7 +56,7 @@ const ChatView = (props: { userId: string, setChat: React.Dispatch<SetStateActio
                                 }
                                 return (
                                     <div key={i} onClick={() => setChat(other_user_id)}>
-                                        <ChatItem name={e.name !== "" ? e.name : "Unknown chat"} userId={other_user_id} />
+                                        <ChatItem userId={other_user_id} />
                                     </div>
                                 )
                             })
