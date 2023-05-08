@@ -53,6 +53,7 @@ const MessageView = (props: { otherUserId: string }) => {
                     return;
                 }
             }).finally(() => {
+                messageRef.current!.value = "";
                 setFileUrl("");
                 setMessageData([...messageData, message]);
                 return;
