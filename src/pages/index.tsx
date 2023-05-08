@@ -37,7 +37,10 @@ const MainContainer = () => {
                     <div className="chats grow "><ChatView userId={user.id} setChat={setChat} /></div>
                     <div className="message-window grow-[2.5] bg-gradient-to-b from-[#2e026d] to-[#15162c] h-full">
                         {
-                            currentChat === "" && <div>Select chat or start new</div>
+                            currentChat === "" &&
+                            <div className="w-full h-full flex items-center justify-center">
+                                <p className="text-3xl text-gray-400">Select a chat or start new</p>
+                            </div>
                         }
                         {
                             currentChat !== "" && <MessageView otherUserId={currentChat} />
@@ -76,7 +79,10 @@ const Home: NextPage = () => {
                 }
                 {
                     !isSignedIn &&
-                    <SignInButton />
+                    <div className="h-full w-full flex flex-col justify-center items-center">
+                        <p className="text-3xl text-gray-400">Sign in with Google or Github</p>
+                        <SignInButton />
+                    </div>
                 }
             </main>
         </>
