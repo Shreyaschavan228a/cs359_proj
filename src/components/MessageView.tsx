@@ -122,15 +122,25 @@ const MessageView = (props: { otherUserId: string }) => {
                 </div>
             )
         }
-        return (
-            <div className="flex flex-col mr-auto border-2 border-black bg-gray-600 text-white p-4 rounded">
-                <div className="flex flex-row gap-1">
-                    <Image src={placeHolderProfileImage} alt={`profile picture for ${name}`} height={20} width={20} />
-                    <p className="text-sm text-gray-300">{name}</p>
+        else {
+            return (
+                <div className="flex flex-col mr-auto border-2 border-black bg-gray-600 text-white p-4 rounded">
+                    <div className="flex flex-row gap-1">
+                        <Image src={placeHolderProfileImage} alt={`profile picture for ${name}`} height={20} width={20} />
+                        <p className="text-sm text-gray-300">{name}</p>
+                    </div>
+                    <p className="text-xl">{data.content}</p>
+                    {
+                        data.file &&
+                        <div className="flex flex-col text-gray-800">
+                            <p>Attatched File:</p>
+                            <Link href={data.file} target="_blank">Download</Link>
+                        </div>
+                    }
                 </div>
-                <p className="text-xl">{data.content}</p>
-            </div>
-        )
+            )
+        }
+
     }
 
     if (!isFetched || !currentUserFetched || !otherUserFetched) {
