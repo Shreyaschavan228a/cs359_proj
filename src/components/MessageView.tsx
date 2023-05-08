@@ -1,14 +1,24 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { useUser } from "@clerk/nextjs";
 import { Message } from "@prisma/client";
 import { api } from "~/utils/api";
 import sendImage from "../assets/send.png";
 import placeHolderProfileImage from "../assets/profile.png";
+import attatchmentImage from "../assets/attatchment.png"
 import Image from "next/image";
-import { useRef } from "react";
+import Link from "next/link";
+import { useRef, useState } from "react";
+
+import { generateReactHelpers } from "@uploadthing/react";
+import type { OurFileRouter } from "~/server/uploadthing";
+
+const { useUploadThing } = generateReactHelpers<OurFileRouter>();
 
 const MessageView = (props: { otherUserId: string }) => {
     const { otherUserId } = props;
     const { user, isSignedIn } = useUser();
+    const [uploadThingVisible, showUploadThing] = useState(false);
+    const [fileUrl, setFileUrl] = useState("");
     const messageRef = useRef<HTMLInputElement>(null);
     if (!isSignedIn) {
         return <div className="text-red h-full w-full">
@@ -32,7 +42,7 @@ const MessageView = (props: { otherUserId: string }) => {
                 senderId: user.id,
                 receiverId: otherUserId,
                 content: message,
-                file: null
+                file: fileUrl
             })
         }).then((res) => res.status)
             .then((status) => {
@@ -40,13 +50,60 @@ const MessageView = (props: { otherUserId: string }) => {
                     return;
                 }
             }).finally(() => {
+                setFileUrl("");
                 return;
             });
     }
 
+    const SingleFileUploader = () => {
+        const { getRootProps, getInputProps, isDragActive, files, startUpload } =
+            useUploadThing("imageUploader");
+
+        const handleUpload = () => {
+            startUpload()
+                //@ts-ignore
+                .then((fileData: [{ fileUrl: string }]) => {
+                    const url = fileData[0].fileUrl;
+                    setFileUrl(url);
+                })
+                .finally(() => {
+                    showUploadThing(false);
+                });
+        }
+        return (
+            <div className="h-120 w-2/3 absolute bg-black flex flex-col p-4">
+                <button onClick={() => { showUploadThing(false); setFileUrl(""); }} className="ml-auto">Hide</button>
+                <div {...getRootProps()}>
+                    <input {...getInputProps()} />
+                    <div>
+                        {files.length > 0 && (
+                            <button onClick={handleUpload}>
+                                Upload {files.length} files
+                            </button>
+                        )}
+                    </div>
+                    Drop files here!
+                </div>
+            </div>
+        )
+    }
+
     const UniqueMessage = (props: { data: Message, type: MessageType, name: string }) => {
         const { data, type, name } = props;
+        const [fileUrl, setFileUrl] = useState("");
 
+        const getFileName = (file: string) => {
+            return file.split('/').pop() ?? "blob";
+        }
+
+        // weird hack for download because link spec doesnt allow cross-origin downloads
+        // TODO: find some way to make downloadable links that dont 
+        // doesnt do anything for now
+        const getFileUrl = () => {
+            if (!data.file) {
+                return;
+            }
+        }
         if (type === MessageType.sent) {
             return (
                 <div className="flex flex-col ml-auto border-2 border-black bg-green-600 text-white p-4 rounded">
@@ -55,6 +112,13 @@ const MessageView = (props: { otherUserId: string }) => {
                         <p className="text-sm text-gray-900">{name}</p>
                     </div>
                     <p className="text-xl">{data.content}</p>
+                    {
+                        data.file &&
+                        <div className="flex flex-col text-gray-800">
+                            <p>Attatched File:</p>
+                            <Link href={data.file} target="_blank">Download</Link>
+                        </div>
+                    }
                 </div>
             )
         }
@@ -74,23 +138,33 @@ const MessageView = (props: { otherUserId: string }) => {
     }
     // at this point everything is fetched
     return (
-        <div className="flex flex-col h-full w-full">
-            <div className="grow w-full flex flex-col p-4">
-                {
-                    isFetched && messages?.map((message, index) => {
-                        if (message.senderId === user.id) {
-                            // very bad not null assertion but have to do it. no time left for proper error catching
-                            return <UniqueMessage data={message} type={MessageType.sent} name={currentUser!.username!} key={index} />
-                        } else {
-                            return <UniqueMessage data={message} type={MessageType.received} name={otherUser!.username!} key={index} />
+        <div className="flex flex-col h-full w-full relative justify-center items-center">
+            {
+                uploadThingVisible &&
+                <SingleFileUploader />
+            }
+            {
+                !uploadThingVisible &&
+                <>
+                    <div className="grow w-full flex flex-col p-4">
+                        {
+                            isFetched && messages?.map((message, index) => {
+                                if (message.senderId === user.id) {
+                                    // very bad not null assertion but have to do it. no time left for proper error catching
+                                    return <UniqueMessage data={message} type={MessageType.sent} name={currentUser!.username!} key={index} />
+                                } else {
+                                    return <UniqueMessage data={message} type={MessageType.received} name={otherUser!.username!} key={index} />
+                                }
+                            })
                         }
-                    })
-                }
-            </div>
-            <div className="flex flex-row w-full border-t-2 border-white gap-1">
-                <input type="text" placeholder="Message..." className="w-full focus:outline-none bg-transparent text-white text-2xl px-2" ref={messageRef} />
-                <button onClick={sendMessage}><Image alt="send message" src={sendImage} height="50" width="50"></Image></button>
-            </div>
+                    </div>
+                    <div className="flex flex-row w-full border-t-2 border-white gap-1">
+                        <input type="text" placeholder="Message..." className="w-full focus:outline-none bg-transparent text-white text-2xl px-2" ref={messageRef} />
+                        <button onClick={() => { showUploadThing(true) }}><Image src={attatchmentImage} alt="attatch a file" height="50" width="50" /></button>
+                        <button onClick={sendMessage}><Image alt="send message" src={sendImage} height="50" width="50"></Image></button>
+                    </div>
+                </>
+            }
         </div>
     )
 }
