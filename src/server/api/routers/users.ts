@@ -14,7 +14,7 @@ export const userRouter = createTRPCRouter({
     .input(z.object({ userId: z.string() }))
     .query(async ({ ctx, input }) => {
       const { userId } = input;
-      const user = await ctx.prisma.user.findUnique({
+      let user = await ctx.prisma.user.findUnique({
         where: {
           id: userId,
         },
@@ -28,8 +28,13 @@ export const userRouter = createTRPCRouter({
             profileImage: "",
           },
         });
+        user = {
+          id: userId,
+          username: "",
+          profileImage: "",
+        } as User;
       }
-      return 1;
+      return user;
     }),
   // get unique user can be used to get current user's data as well as create a
   // new user if it doesn't already exist

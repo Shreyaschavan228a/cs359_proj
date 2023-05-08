@@ -63,7 +63,12 @@ const Home: NextPage = () => {
 
 
     if (isSignedIn && user) {
-        api.users.createUserIfNotExist.useQuery({ userId: user.id });
+        const { data: queryUser, isFetched } = api.users.createUserIfNotExist.useQuery({ userId: user.id });
+        if (isFetched) {
+            if (queryUser?.username === "" || !queryUser?.username) {
+                router.push("./update_profile").finally(() => { console.log("redirected successfully") });
+            }
+        }
     }
 
     return (
