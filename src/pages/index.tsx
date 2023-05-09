@@ -34,8 +34,8 @@ const MainContainer = () => {
         <div className="w-full flex flex-row h-full">
             {isSignedIn &&
                 <>
-                    <div className="chats grow "><ChatView userId={user.id} setChat={setChat} /></div>
-                    <div className="message-window grow-[2.5] bg-gradient-to-b from-[#2e026d] to-[#15162c] h-full">
+                    <div className="chats w-1/3"><ChatView userId={user.id} setChat={setChat} /></div>
+                    <div className="message-window w-2/3 bg-gradient-to-b from-[#2e026d] to-[#15162c] h-full">
                         {
                             currentChat === "" &&
                             <div className="w-full h-full flex items-center justify-center">

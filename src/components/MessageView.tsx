@@ -96,7 +96,7 @@ const MessageView = (props: { userid: string, otherUserId: string }) => {
                 });
         }
         return (
-            <div className="h-120 w-2/3 absolute bg-black flex flex-col p-4">
+            <div className="h-120 w-72 absolute bg-black flex flex-col p-4 rounded border-2 border-white">
                 <button onClick={() => { showUploadThing(false); setFileUrl(""); }} className="ml-auto">Hide</button>
                 <div {...getRootProps()}>
                     <input {...getInputProps()} />
@@ -131,12 +131,12 @@ const MessageView = (props: { userid: string, otherUserId: string }) => {
         }
         if (type === MessageType.sent) {
             return (
-                <div className="flex flex-col ml-auto border-2 border-black bg-green-600 text-white p-4 rounded">
+                <div className="flex flex-col ml-auto border-2 border-black bg-green-500 text-white p-4 rounded">
                     <div className="flex flex-row gap-1">
                         <Image src={placeHolderProfileImage} alt={`profile picture for ${name}`} height={20} width={20} />
-                        <p className="text-sm text-gray-900">{name}</p>
+                        <p className="text-sm text-black">{name}</p>
                     </div>
-                    <p className="text-xl">{data.content}</p>
+                    <p className="text-xl text-black">{data.content}</p>
                     {
                         data.file &&
                         <div className="flex flex-col text-gray-800">
@@ -181,7 +181,7 @@ const MessageView = (props: { userid: string, otherUserId: string }) => {
             {
                 !uploadThingVisible &&
                 <>
-                    <div className="basis-16 bg-black w-full flex flex-row justify-center p-2">
+                    <div className="basis-16 bg-slate-900 w-full flex flex-row justify-start p-2">
                         <h1 className="text-2xl">{otherUser?.username}</h1>
                     </div>
                     <div className="grow w-full flex flex-col p-4 justify-start">
