@@ -4,6 +4,7 @@ import { api } from "~/utils/api";
 import Image from "next/image";
 import placholderImage from "../assets/profile.png";
 import type { responseType } from "~/pages/api/createNewChat";
+import { toast } from "react-toastify";
 
 const ChatItem = (props: { userId: string }) => {
     const { data: user, isLoading } = api.users.getUniqueUser.useQuery({ userId: props.userId });
@@ -32,7 +33,6 @@ const ChatItem = (props: { userId: string }) => {
 const ChatView = (props: { userId: string, setChat: React.Dispatch<SetStateAction<string>> }) => {
     const { userId, setChat } = props;
     const { data: userChats, isLoading } = api.users.getUserChats.useQuery({ userId });
-    const [statusMsg, setStatusMsg] = useState("");
     const newChatRef = useRef<HTMLInputElement>(null);
 
     const handleNewChat = () => {
@@ -51,10 +51,16 @@ const ChatView = (props: { userId: string, setChat: React.Dispatch<SetStateActio
                     setChat(secondUserId!);
                 }
                 else if (error === "User not found") {
-                    setStatusMsg(error);
-                    setTimeout(() => {
-                        setStatusMsg("");
-                    }, 1000);
+                    toast.error(error, {
+                        position: "top-center",
+                        autoClose: 1500,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        progress: undefined,
+                        theme: "dark",
+                    });
                 }
                 newChatRef.current!.value = "";
             })
@@ -72,15 +78,9 @@ const ChatView = (props: { userId: string, setChat: React.Dispatch<SetStateActio
                 <div className="bg-slate-900 border-red-600 border-r-2 h-full flex flex-col">
 
                     <div className="flex flex-row text-2xl border-b-2 p-4 items-stretch w-full justify-between">
-                        <div className="flex flex-col w-1/2" >
-                            <input type="text" ref={newChatRef} className="focus:outline-none bg-transparent text-white text-2xl px-2"
-                                placeholder="Create new chat..."
-                            />
-                            {
-                                statusMsg !== "" &&
-                                <p className="text-base px-2 text-red-500">{statusMsg}</p>
-                            }
-                        </div>
+                        <input type="text" ref={newChatRef} className="focus:outline-none bg-transparent text-white text-2xl px-2"
+                            placeholder="Create new chat..."
+                        />
                         <button onClick={handleNewChat}><span className="material-icons">add</span></button>
                     </div>
 

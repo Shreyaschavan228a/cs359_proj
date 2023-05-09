@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { api } from "~/utils/api";
 import type { User } from "@prisma/client";
 import Link from "next/link";
+import { toast } from "react-toastify";
 
 const UpdatePage = () => {
     const { user, isSignedIn, isLoaded } = useUser();
@@ -20,10 +21,16 @@ const UpdatePage = () => {
         e.preventDefault();
         if (isSignedIn) {
             if (user.id === "" || username === "") {
-                setSuccess("no");
-                setTimeout(() => {
-                    setSuccess("")
-                }, 2000);
+                toast.error('Please enter an username', {
+                    position: "top-right",
+                    autoClose: 1500,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "light",
+                });
                 return;
             }
             fetch("/api/updateUser", {
@@ -33,16 +40,28 @@ const UpdatePage = () => {
                 return res.status;
             }).then((status) => {
                 if (status === 200) {
-                    setSuccess("yes");
-                    setTimeout(() => {
-                        setSuccess("")
-                    }, 2000);
+                    toast.success('Profile Updated Successfully', {
+                        position: "top-right",
+                        autoClose: 1500,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        progress: undefined,
+                        theme: "light",
+                    });
                 }
                 else if (status === 400) {
-                    setSuccess("no");
-                    setTimeout(() => {
-                        setSuccess("")
-                    }, 2000);
+                    toast.error('An error occured while updating profile', {
+                        position: "top-right",
+                        autoClose: 1500,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        progress: undefined,
+                        theme: "light",
+                    });
                 }
                 else {
                     console.log("Unreachable");
@@ -73,18 +92,6 @@ const UpdatePage = () => {
                         <input id="profileImage" placeholder="Url..." onBlur={(e) => setProfileUrl(e.target.value)} className="bg-transparent border-blue-900 border-2 text-white outline-none" type="text" />
                         <button type="submit">Submit</button>
                     </form>
-                    {
-                        success === "no" &&
-                        <div className="border-2 border-red-600 p-3">
-                            <p>Something went wrong</p>
-                        </div>
-                    }
-                    {
-                        success === "yes" &&
-                        <div className="border-2 border-green-500 p-3">
-                            <p>Profile updated successfully</p>
-                        </div>
-                    }
                 </div>
             }
             {

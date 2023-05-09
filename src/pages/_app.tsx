@@ -1,10 +1,12 @@
 import { type AppType } from "next/app";
 import 'material-icons/iconfont/material-icons.css';
 import { api } from "~/utils/api";
+import { ToastContainer } from "react-toastify";
 
 import { ClerkProvider, SignInButton, SignOutButton, useUser } from "@clerk/nextjs";
 
 import "~/styles/globals.css";
+import 'react-toastify/dist/ReactToastify.css';
 import Link from "next/link";
 
 const Footer = () => {
@@ -39,6 +41,7 @@ const Header = () => {
 const MyApp: AppType = ({ Component, pageProps }) => {
     return (
         <ClerkProvider {...pageProps}>
+            <ToastContainer />
             <div className="bg-gradient-to-b from-[#2e026d] to-[#15162c] text-white h-screen flex flex-col">
                 <Header />
                 <div className="grow">
