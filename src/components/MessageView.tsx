@@ -181,7 +181,10 @@ const MessageView = (props: { userid: string, otherUserId: string }) => {
             {
                 !uploadThingVisible &&
                 <>
-                    <div className="grow w-full flex flex-col p-4">
+                    <div className="basis-16 bg-black w-full flex flex-row justify-center p-2">
+                        <h1 className="text-2xl">{otherUser?.username}</h1>
+                    </div>
+                    <div className="grow w-full flex flex-col p-4 justify-start">
                         {
                             !isLoading && messages?.map((message, index) => {
                                 if (message.senderId === user.id) {
@@ -193,7 +196,7 @@ const MessageView = (props: { userid: string, otherUserId: string }) => {
                             })
                         }
                     </div>
-                    <div className="flex flex-row w-full border-t-2 border-white gap-1">
+                    <div className="flex flex-row w-full border-t-2 border-white gap-1 basis-10">
                         <input type="text" placeholder="Message..." className="w-full focus:outline-none bg-transparent text-white text-2xl px-2" ref={messageRef} />
                         <button onClick={() => { showUploadThing(true) }}><Image src={attatchmentImage} alt="attatch a file" height="50" width="50" /></button>
                         <button onClick={sendMessage}><Image alt="send message" src={sendImage} height="50" width="50"></Image></button>
