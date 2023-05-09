@@ -38,7 +38,6 @@ const MessageView = (props: { userid: string, otherUserId: string }) => {
     const [uploadThingVisible, showUploadThing] = useState(false);
     const [fileUrl, setFileUrl] = useState("");
     // for handling messages that were sent or received during this specific lifetime of the component
-    const [messageData, setMessageData] = useState<Message[]>([]);
     const messageRef = useRef<HTMLInputElement>(null);
     const { data: messages, isLoading } = useSWR(['/api/getMessages/', { userid, otherUserId }], ([url, token]) => fetcher(url, token), { refreshInterval: 1200 }) as {
         data: Message[],
@@ -77,7 +76,6 @@ const MessageView = (props: { userid: string, otherUserId: string }) => {
             }).finally(() => {
                 messageRef.current!.value = "";
                 setFileUrl("");
-                // setMessageData([...messageData, message]);
                 return;
             });
     }
@@ -186,18 +184,6 @@ const MessageView = (props: { userid: string, otherUserId: string }) => {
                     <div className="grow w-full flex flex-col p-4">
                         {
                             !isLoading && messages?.map((message, index) => {
-                                if (message.senderId === user.id) {
-                                    // very bad not null assertion but have to do it. no time left for proper error catching
-                                    return <UniqueMessage data={message} type={MessageType.sent} name={currentUser!.username!} key={index} />
-                                } else {
-                                    return <UniqueMessage data={message} type={MessageType.received} name={otherUser!.username!} key={index} />
-                                }
-                            })
-                        }
-                        {/* only for rendering new messages in this runtime, on next mount they will be rendered by the block above */}
-                        {/* probably have some better way of doing this */}
-                        {
-                            messageData?.map((message, index) => {
                                 if (message.senderId === user.id) {
                                     // very bad not null assertion but have to do it. no time left for proper error catching
                                     return <UniqueMessage data={message} type={MessageType.sent} name={currentUser!.username!} key={index} />
