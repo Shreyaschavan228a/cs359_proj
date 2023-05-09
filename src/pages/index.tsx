@@ -43,7 +43,7 @@ const MainContainer = () => {
                             </div>
                         }
                         {
-                            currentChat !== "" && <MessageView otherUserId={currentChat} key={currentChat} />
+                            currentChat !== "" && <MessageView otherUserId={currentChat} userid={user.id} key={currentChat} />
                         }
                     </div>
                 </>

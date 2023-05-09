@@ -11,25 +11,47 @@ import { useRef, useState } from "react";
 
 import { generateReactHelpers } from "@uploadthing/react";
 import type { OurFileRouter } from "~/server/uploadthing";
+import useSWR from 'swr';
 
 const { useUploadThing } = generateReactHelpers<OurFileRouter>();
 
-const MessageView = (props: { otherUserId: string }) => {
-    const { otherUserId } = props;
+// swr for fetching messages
+const fetcher = (url: string, token: { userid: string, otherUserId: string }) => {
+    const args = {
+        currentUserId: token.userid,
+        otherUserId: token.otherUserId,
+    };
+    return fetch(url, {
+        body: JSON.stringify(args),
+        method: "POST"
+    }).then((res) => {
+        return res.json();
+    })
+}
+
+
+
+const MessageView = (props: { userid: string, otherUserId: string }) => {
+
+    const { otherUserId, userid } = props;
     const { user, isSignedIn } = useUser();
     const [uploadThingVisible, showUploadThing] = useState(false);
     const [fileUrl, setFileUrl] = useState("");
     // for handling messages that were sent or received during this specific lifetime of the component
     const [messageData, setMessageData] = useState<Message[]>([]);
     const messageRef = useRef<HTMLInputElement>(null);
+    const { data: messages, isLoading } = useSWR(['/api/getMessages/', { userid, otherUserId }], ([url, token]) => fetcher(url, token), { refreshInterval: 1200 }) as {
+        data: Message[],
+        isLoading: boolean
+    };
     if (!isSignedIn) {
         return <div className="text-red h-full w-full">
             <p>Something went wrong</p>
         </div>
     }
-    const { data: messages, isFetched } = api.messages.getUniqueMessages.useQuery({ currentUserId: user.id, otherUserId });
     const { data: currentUser, isFetched: currentUserFetched } = api.users.getUniqueUser.useQuery({ userId: user.id });
     const { data: otherUser, isFetched: otherUserFetched } = api.users.getUniqueUser.useQuery({ userId: otherUserId });
+
 
     enum MessageType {
         sent,
@@ -55,7 +77,7 @@ const MessageView = (props: { otherUserId: string }) => {
             }).finally(() => {
                 messageRef.current!.value = "";
                 setFileUrl("");
-                setMessageData([...messageData, message]);
+                // setMessageData([...messageData, message]);
                 return;
             });
     }
@@ -148,7 +170,7 @@ const MessageView = (props: { otherUserId: string }) => {
 
     }
 
-    if (!isFetched || !currentUserFetched || !otherUserFetched) {
+    if (isLoading || !currentUserFetched || !otherUserFetched) {
         return <div>Loading</div>
     }
     // at this point everything is fetched
@@ -163,7 +185,7 @@ const MessageView = (props: { otherUserId: string }) => {
                 <>
                     <div className="grow w-full flex flex-col p-4">
                         {
-                            isFetched && messages?.map((message, index) => {
+                            !isLoading && messages?.map((message, index) => {
                                 if (message.senderId === user.id) {
                                     // very bad not null assertion but have to do it. no time left for proper error catching
                                     return <UniqueMessage data={message} type={MessageType.sent} name={currentUser!.username!} key={index} />
