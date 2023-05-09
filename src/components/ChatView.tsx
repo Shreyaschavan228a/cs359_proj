@@ -1,8 +1,9 @@
-import { SetStateAction, useEffect } from "react";
+import { SetStateAction, useState, useRef } from "react";
 import type { User } from "@prisma/client";
 import { api } from "~/utils/api";
 import Image from "next/image";
 import placholderImage from "../assets/profile.png";
+import type { responseType } from "~/pages/api/createNewChat";
 
 const ChatItem = (props: { userId: string }) => {
     const { data: user, isLoading } = api.users.getUniqueUser.useQuery({ userId: props.userId });
@@ -30,8 +31,37 @@ const ChatItem = (props: { userId: string }) => {
 
 const ChatView = (props: { userId: string, setChat: React.Dispatch<SetStateAction<string>> }) => {
     const { userId, setChat } = props;
-    const { data: userChats, isLoading } = api.users.getUserChats.useQuery({ userId })
+    const { data: userChats, isLoading } = api.users.getUserChats.useQuery({ userId });
+    const [statusMsg, setStatusMsg] = useState("");
+    const newChatRef = useRef<HTMLInputElement>(null);
 
+    const handleNewChat = () => {
+        const newUserName = newChatRef.current!.value;
+        fetch('/api/createNewChat', {
+            method: "POST",
+            body: JSON.stringify({ currentUserId: userId, newUserName: newUserName }),
+        })
+            .then(async (res) => {
+                return res.json();
+            })
+            .then((jsonObj: responseType) => {
+                const { secondUserId, error } = jsonObj;
+
+                if (error === "None" || error === "Chat already exists") {
+                    setChat(secondUserId!);
+                }
+                else if (error === "User not found") {
+                    setStatusMsg(error);
+                    setTimeout(() => {
+                        setStatusMsg("");
+                    }, 1000);
+                }
+                newChatRef.current!.value = "";
+            })
+            .finally(() => {
+                console.log("done");
+            });
+    }
 
     return (
         <>
@@ -40,10 +70,20 @@ const ChatView = (props: { userId: string, setChat: React.Dispatch<SetStateActio
             }
             {
                 <div className="bg-slate-900 border-red-600 border-r-2 h-full flex flex-col">
-                    <div className="flex flex-row justify-between text-2xl border-b-2 p-4 items-stretch">
-                        <p>Create new Chat... </p>
-                        <button><span className="material-icons">add</span></button>
+
+                    <div className="flex flex-row text-2xl border-b-2 p-4 items-stretch w-full justify-between">
+                        <div className="flex flex-col w-1/2" >
+                            <input type="text" ref={newChatRef} className="focus:outline-none bg-transparent text-white text-2xl px-2"
+                                placeholder="Create new chat..."
+                            />
+                            {
+                                statusMsg !== "" &&
+                                <p className="text-base px-2 text-red-500">{statusMsg}</p>
+                            }
+                        </div>
+                        <button onClick={handleNewChat}><span className="material-icons">add</span></button>
                     </div>
+
                     <div className="bg-gradient-to-r from-slate-800 to-slate-900 grow">
                         {
                             userChats?.map((e, i) => {
