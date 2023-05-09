@@ -53,6 +53,13 @@ const UpdatePage = () => {
         }
     }
 
+    if (!isLoaded) {
+        return (
+            <div className="h-full w-full flex flex-col items-center justify-center text-3xl text-gray-400">
+                <p>Loading</p>
+            </div>
+        )
+    }
     return (
         <div className="h-full w-full">
             {
